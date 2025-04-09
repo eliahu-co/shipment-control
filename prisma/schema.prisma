@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Truck {
+  id                 Int                      @id @default(autoincrement())
+  length             Float
+  width              Float
+  height             Float
+  isFull             Boolean                  @default(false)
+  isReadyForShipping Boolean                  @default(false)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  assignments        TruckPackageAssignment[]
+
+  @@map("trucks")
+}
+
+model Package {
+  id          Int                      @id @default(autoincrement())
+  length      Float
+  width       Float
+  height      Float
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  assignments TruckPackageAssignment[]
+
+  @@map("packages")
+}
+
+model TruckPackageAssignment {
+  id         Int      @id @default(autoincrement())
+  truckId    Int
+  packageId  Int
+  assignedAt DateTime @default(now())
+  package    Package  @relation(fields: [packageId], references: [id])
+  truck      Truck    @relation(fields: [truckId], references: [id])
+
+  @@unique([truckId, packageId])
+  @@map("truck_package_assignments")
+}
